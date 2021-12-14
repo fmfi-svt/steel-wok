@@ -6,7 +6,10 @@ import re
 AUTHORS_SELECTOR = ".authors-div > .ng-star-inserted > span:nth-child(2) .value"  # noqa
 TITLE_SELECTOR = ".title.text--large"
 JOURNAL_SELECTOR = ".journal-content .journal-content-row"
-SELECTORS = {
+CITING_SELECTORS = {
+    "citations_articles": ".summary-record > .data-section h3",
+}
+ARTICLE_SELECTORS = {
     "journal": "app-jcr-overlay",
     "volume": "#FullRTa-volume",
     "issue": "#FullRTa-issue",
@@ -23,7 +26,30 @@ JOURNAL_SELECTORS_MAPPING = {
     "Current Publisher": "publisher",
 }
 
-YEAR_REGEX = re.compile(".*([0-9]{4})")
+REGEX = {
+    "year": re.compile(".*([0-9]{4})"),
+    "wos_id_number": re.compile("([0-9]{15})"),
+}
+CITING_SUMMARY_URL_PREFIX = "https://www.webofscience.com/wos/woscc/citing-summary/"
+
+
+async def extract_citing_summary(page: Page, article_id: str):
+    url = CITING_SUMMARY_URL_PREFIX + article_id
+    await page.goto(url, wait_until="networkidle")
+
+    last_len = -1
+    articles = []
+    while len(articles) > last_len:
+        last_len = len(articles)
+        await page.keyboard.press("PageDown")
+        articles = await page.query_selector_all(CITING_SELECTORS["citations_articles"])
+
+    articles_ids = []
+    for article in articles:
+        article_text = await article.inner_html()
+        article_id = REGEX["wos_id_number"].findall(article_text)[0]
+        articles_ids.append(f"WOS:{article_id}")
+    return articles_ids
 
 
 async def extract_text_from_selector(
@@ -71,8 +97,8 @@ async def main_extract(url: str, debug: bool = False, proxy_server: str = ""):
 
         outputs["authors"] = authors_list
 
-        for selector in SELECTORS.keys():
-            text = await extract_text_from_selector(SELECTORS[selector], page)
+        for selector in ARTICLE_SELECTORS.keys():
+            text = await extract_text_from_selector(ARTICLE_SELECTORS[selector], page)
             outputs[selector] = text
 
         journal_metdata = {}
@@ -83,7 +109,7 @@ async def main_extract(url: str, debug: bool = False, proxy_server: str = ""):
 
             value_selector = await row.query_selector_all("span")
             value = ", ".join([await span.inner_text() for span in value_selector])
-            # Quick hack around getting comma spearation of those spans right
+            # Quick hack around getting comma separation of those spans right
             value = value.replace(", ,", ",")
 
             journal_metdata[key] = value
@@ -93,10 +119,13 @@ async def main_extract(url: str, debug: bool = False, proxy_server: str = ""):
                 outputs[outputs_key] = journal_metdata[journal_key]
 
         if "pubdate" in outputs:
-            year_match = YEAR_REGEX.match(outputs["pubdate"])
+            year_match = REGEX["year"].match(outputs["pubdate"])
             if year_match:
                 # Pick the capture group -- hopefully the year
                 outputs["year"] = year_match.group(1)
+
+        article_id = url.split("/")[-1]
+        outputs["citing_summary"] = await extract_citing_summary(page, article_id)
 
         import pprint
 
