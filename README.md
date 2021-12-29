@@ -4,9 +4,13 @@ Exactly what it sounds like
 ## Installation
 
 All the dependencies should be in `requirements.txt`. Hence, installation
-should be as easy as running
+should be as easy as running:
 
     pip install -r requirements.txt
+
+Install the `pre-commit` hook that checks the correct formatting:
+
+    pre-commit install
 
 Since many of the scripts included here use `playwright`, we suggest installing
 its dependencies too:
