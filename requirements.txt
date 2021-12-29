@@ -1,7 +1,7 @@
 black==21.12b0
 click==8.0.3
 greenlet==1.1.2
-importlib-metadata==4.8.2
+importlib-metadata==4.10.0
 msgpack==1.0.3
 playwright==1.17.2
 pre-commit==2.16.0

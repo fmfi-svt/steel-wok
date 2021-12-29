@@ -1,4 +1,6 @@
 import asyncio
+import time
+
 from playwright.async_api import async_playwright, Page
 import typer
 import re
@@ -8,6 +10,8 @@ TITLE_SELECTOR = ".title.text--large"
 JOURNAL_SELECTOR = ".journal-content .journal-content-row"
 CITING_SELECTORS = {
     "citations_articles": ".summary-record > .data-section h3",
+    "current_page": ".wos-input-underline",
+    "final_page": ".end-page",
 }
 ARTICLE_SELECTORS = {
     "journal": "app-jcr-overlay",
@@ -37,12 +41,36 @@ async def extract_citing_summary(page: Page, article_id: str):
     url = CITING_SUMMARY_URL_PREFIX + article_id
     await page.goto(url, wait_until="networkidle")
 
-    last_len = -1
+    curr_page = await page.query_selector(CITING_SELECTORS["current_page"])
+    curr_page_text = await curr_page.input_value()
+    curr_page_num = int(curr_page_text.strip())
+
+    final_page = await page.query_selector(CITING_SELECTORS["final_page"])
+    final_page_text = await final_page.inner_html()
+    final_page_num = int(final_page_text.strip())
+
     articles = []
-    while len(articles) > last_len:
-        last_len = len(articles)
-        await page.keyboard.press("PageDown")
-        articles = await page.query_selector_all(CITING_SELECTORS["citations_articles"])
+    while True:
+        curr_articles_num = -1
+        curr_articles = []
+
+        while len(curr_articles) > curr_articles_num:
+            curr_articles_num = len(curr_articles)
+            await page.keyboard.press("PageDown")
+            curr_articles = await page.query_selector_all(
+                CITING_SELECTORS["citations_articles"]
+            )
+            time.sleep(0.1)
+
+        articles.extend(curr_articles)
+
+        if curr_page_num < final_page_num:
+            await page.click('[aria-label="Bottom Next Page"]')
+            time.sleep(2)
+        if curr_page_num == final_page_num:
+            break
+
+        curr_page_num += 1
 
     articles_ids = []
     for article in articles:
