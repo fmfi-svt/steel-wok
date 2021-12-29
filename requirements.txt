@@ -4,6 +4,7 @@ greenlet==1.1.2
 importlib-metadata==4.8.2
 msgpack==1.0.3
 playwright==1.17.0
+pre-commit==2.16.0
 pyee==8.2.2
 typer==0.4.0
 typing_extensions==4.0.0
