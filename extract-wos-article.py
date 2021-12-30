@@ -38,7 +38,7 @@ CITING_SUMMARY_URL_PREFIX = "https://www.webofscience.com/wos/woscc/citing-summa
 
 
 async def extract_citing_summary(page: Page, article_id: str):
-    url = CITING_SUMMARY_URL_PREFIX + article_id
+    url = f"{CITING_SUMMARY_URL_PREFIX}{article_id}"
     await page.goto(url, wait_until="networkidle")
 
     curr_page = await page.query_selector(CITING_SELECTORS["current_page"])
