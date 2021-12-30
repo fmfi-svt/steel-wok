@@ -8,10 +8,6 @@ should be as easy as running:
 
     pip install -r requirements.txt
 
-Install the `pre-commit` hook that checks the correct formatting:
-
-    pre-commit install
-
 Since many of the scripts included here use `playwright`, we suggest installing
 its dependencies too:
 
@@ -59,3 +55,9 @@ Shuld you want to make use of a proxy, e.g. SOCKS proxy running on port `11000`
 on `localhost`, you can do so by specifying further options:
 
     python extract-wos-article.py https://www.webofscience.com/wos/woscc/full-record/WOS:000690353600001 --debug --proxy-server socks://localhost:11000
+
+## Development
+
+Install the `pre-commit` hook that checks the correct formatting:
+
+    pre-commit install
