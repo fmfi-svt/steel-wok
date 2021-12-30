@@ -57,9 +57,7 @@ async def extract_citing_summary(page: Page, article_id: str):
         while len(curr_articles) > curr_articles_num:
             curr_articles_num = len(curr_articles)
             await page.keyboard.press("PageDown")
-            curr_articles = await page.query_selector_all(
-                CITING_SELECTORS["citations_articles"]
-            )
+            curr_articles = await page.query_selector_all(CITING_SELECTORS["citations_articles"])
             time.sleep(0.1)
 
         articles.extend(curr_articles)
@@ -80,9 +78,7 @@ async def extract_citing_summary(page: Page, article_id: str):
     return articles_ids
 
 
-async def extract_text_from_selector(
-    selector: str, page: Page, default_value: str = ""
-):
+async def extract_text_from_selector(selector: str, page: Page, default_value: str = ""):
     selector = await page.query_selector(selector)
     if not selector:
         return default_value
@@ -161,9 +157,7 @@ async def main_extract(url: str, debug: bool = False, proxy_server: str = ""):
         await browser.close()
 
 
-def main(
-    url: str, debug: bool = typer.Option(False), proxy_server: str = typer.Option("")
-):
+def main(url: str, debug: bool = typer.Option(False), proxy_server: str = typer.Option("")):
     asyncio.run(main_extract(url, debug, proxy_server))
 
 
