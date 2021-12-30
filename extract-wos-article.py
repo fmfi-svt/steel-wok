@@ -50,7 +50,7 @@ async def extract_citing_summary(page: Page, article_id: str):
     final_page_num = int(final_page_text.strip())
 
     articles = []
-    while True:
+    while curr_page_num <= final_page_num:
         curr_articles_num = -1
         curr_articles = []
 
@@ -60,14 +60,11 @@ async def extract_citing_summary(page: Page, article_id: str):
             curr_articles = await page.query_selector_all(CITING_SELECTORS["citations_articles"])
             time.sleep(0.1)
 
-        articles.extend(curr_articles)
-
         if curr_page_num < final_page_num:
             await page.click('[aria-label="Bottom Next Page"]')
             time.sleep(2)
-        if curr_page_num == final_page_num:
-            break
 
+        articles.extend(curr_articles)
         curr_page_num += 1
 
     articles_ids = []
