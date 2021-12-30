@@ -32,7 +32,7 @@ JOURNAL_SELECTORS_MAPPING = {
 
 REGEX = {
     "year": re.compile(".*([0-9]{4})"),
-    "wos_id_number": re.compile("([0-9]{15})"),
+    "wos_id": re.compile("(WOS:[0-9]{15})"),
 }
 CITING_SUMMARY_URL_PREFIX = "https://www.webofscience.com/wos/woscc/citing-summary/"
 
@@ -73,8 +73,8 @@ async def extract_citing_summary(page: Page, article_id: str):
     articles_ids = []
     for article in articles:
         article_text = await article.inner_html()
-        article_id = REGEX["wos_id_number"].findall(article_text)[0]
-        articles_ids.append(f"WOS:{article_id}")
+        article_id = REGEX["wos_id"].findall(article_text)[0]
+        articles_ids.append(article_id)
     return articles_ids
 
 
