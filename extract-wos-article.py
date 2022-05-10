@@ -100,6 +100,8 @@ async def main_extract(url: str, debug: bool = False, proxy_server: str = ""):
         await page.goto(url, wait_until="networkidle")
 
         await page.click("#onetrust-accept-btn-handler")
+        await page.click(".closeButton")
+        await page.click("#pendo-button-59b176ac")
 
         outputs = {}
 
